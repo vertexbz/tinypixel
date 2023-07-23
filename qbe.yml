@@ -1,0 +1,22 @@
+name: hostpixel
+author: vertexbz@gmail.com
+license: WTF
+provides:
+  pip-app:
+    services:
+      - hostpixel.service
+    pip-requirements: ./requirements.txt
+  moonraker-extension:
+    - source: extension/hostpixel.py
+      target: hostpixel.py
+      only:
+        moonraker: true
+  klipper-extension:
+    - source: extension/klipper/dummypixel.py
+      target: dummypixel.py
+      only:
+        klipper: dummy
+    - source: extension/hostpixel.py
+      target: hostpixel.py
+      only:
+        klipper: full
