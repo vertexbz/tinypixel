@@ -15,6 +15,7 @@ from command.off import OffCommand
 from command.bye import ByeCommand
 from command.read import ReadCommand
 from command.count import CountCommand
+from command.fill import FillCommand
 
 ControllerConfig = tuple[Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig]]
 
@@ -34,6 +35,9 @@ class Controller(BaseController):
     def handle(self, cmd: AnyCommand):
         if isinstance(cmd, SetLedCommand):
             self._channel[cmd.channel].set_pixel(cmd.index, (cmd.r, cmd.g, cmd.b, cmd.w), cmd.send)
+            return 'OK!'
+        if isinstance(cmd, FillCommand):
+            self._channel[cmd.channel].fill((cmd.r, cmd.g, cmd.b, cmd.w), cmd.send)
             return 'OK!'
         if isinstance(cmd, OffCommand):
             self.off()

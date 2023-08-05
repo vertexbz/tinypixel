@@ -7,10 +7,11 @@ from command.off import OffCommand
 from command.bye import ByeCommand
 from command.read import ReadCommand
 from command.count import CountCommand
+from command.fill import FillCommand
 
 
-ALL_COMMANDS = (SetLedCommand, OffCommand, ByeCommand, ReadCommand, CountCommand)
-AnyCommand = Union[SetLedCommand, OffCommand, ByeCommand, ReadCommand, CountCommand]
+ALL_COMMANDS = (SetLedCommand, OffCommand, ByeCommand, ReadCommand, CountCommand, FillCommand)
+AnyCommand = Union[SetLedCommand, OffCommand, ByeCommand, ReadCommand, CountCommand, FillCommand]
 
 
 class UnknownCommandError(Exception):
