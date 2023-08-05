@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import grp
 import os
 import socket
 import traceback
@@ -23,6 +25,8 @@ class Server:
 
         # Bind the socket to socket_file
         sock.bind(self.socket_file)
+        os.chown(self.socket_file, os.getuid(), grp.getgrnam('gpio').gr_gid)
+        os.chmod(self.socket_file, 0o770)
 
         # Listen for incoming connections
         sock.listen()

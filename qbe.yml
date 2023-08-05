@@ -6,6 +6,9 @@ provides:
     services:
       - hostpixel.service
     pip-requirements: ./requirements.txt
+  moonraker-config:
+    blueprint:
+      - hostpixel.conf
   moonraker-extension:
     - source: extension/hostpixel.py
       target: hostpixel.py
