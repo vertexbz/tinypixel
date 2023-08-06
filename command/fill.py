@@ -25,7 +25,7 @@ class FillCommand(Command):
             r = int(match.group(2))
             g = int(match.group(3))
             b = int(match.group(4))
-            w = -1 if match.group(5) is None else int(match.group(5))
+            w = 0 if match.group(5) is None else int(match.group(5))
             send = match.group(6) != '0'
 
             if 0 <= channel <= 3 and 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255 and -1 <= w <= 255:
