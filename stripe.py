@@ -5,6 +5,7 @@ from logger import logger
 from typing import Optional, Union, Sequence, Type
 from type import NeoPin, NeoColor, NeoOrder
 from adafruit_pixelbuf import PixelBuf
+from utils import to_hex_color
 
 try:
     import board
@@ -64,11 +65,15 @@ class Dummy(PixelBuf):
 
 class Stripe:
     def __init__(self, config: StripeConfig):
+        self._logger = logger.getChild('stripe').getChild(f'channel {config.channel}')
+
         try:
             pin = _pin_to_board(config.pin)
             order = _read_pixel_order(config.order)
-            logger.getChild('stripe').getChild(f'channel: {config.channel}').warning(f'pin {pin}, count: {config.count}')
-            logger.getChild('stripe').getChild(f'channel: {config.channel}').warning(f'order {order}, bpp: {len(order)}')
+
+            self._logger.debug(f'pin {pin}, count: {config.count}')
+            self._logger.debug(f'order {order}, bpp: {len(order)}')
+
             self.neopixel = neopixel.NeoPixel(
                 pin,
                 config.count,
@@ -98,13 +103,17 @@ class Stripe:
         self.deinit()
 
     def fill(self, color: NeoColor, send: bool = True):
+        self._logger.debug(f'filling with {to_hex_color(color)}')
         self.neopixel.fill(color)
         if send:
+            self._logger.debug(f'rendering')
             self.neopixel.show()
 
     def set_pixel(self, index: Union[int, slice], color: Union[NeoColor, Sequence[NeoColor]], send: bool = True):
+        self._logger.debug(f'setting pixel {index} to {to_hex_color(color)}')
         self.neopixel[index] = color
         if send:
+            self._logger.debug(f'rendering')
             self.neopixel.show()
 
     def get_pixels(self, *indexes):

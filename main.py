@@ -4,6 +4,7 @@ import sys
 import argparse
 import configparser
 
+from utils import to_hex_color
 from typing import Optional as Opt
 from logger import logger, stdout_handler, file_handler
 from server import ControllerAwareServer
@@ -18,13 +19,6 @@ from command.count import CountCommand
 from command.fill import FillCommand
 
 ControllerConfig = tuple[Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig]]
-
-
-def to_hex_color(colors: list[int]) -> str:
-    if len(colors) == 3:
-        colors = [*colors, 0]
-
-    return ''.join('%02x' % color for color in colors)
 
 
 class Controller(BaseController):
