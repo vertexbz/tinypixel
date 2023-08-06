@@ -27,7 +27,7 @@ class SetLedCommand(Command):
             r = int(match.group(3))
             g = int(match.group(4))
             b = int(match.group(5))
-            w = -1 if len(match.group(6)) == 0 else int(match.group(6))
+            w = -1 if match.group(6) is None else int(match.group(6))
             send = match.group(7) != '0'
 
             if 0 <= channel <= 3 and index > 0 and 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255 and -1 <= w <= 255:

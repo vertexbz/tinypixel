@@ -64,6 +64,7 @@ class Server:
                 except BrokenPipeError:
                     break
                 except Exception as err:
+                    connection.sendall(f'Error!\n')
                     logger.error("".join(traceback.format_exception(type(err), err, err.__traceback__)))
                     pass
 
