@@ -72,7 +72,7 @@ class Stripe:
                 config.count,
                 bpp=len(order),
                 brightness=config.brightness,
-                auto_write=False,
+                # auto_write=False,
                 pixel_order=_read_pixel_order(config.order)
             )
         except NameError:
