@@ -65,12 +65,15 @@ class Dummy(PixelBuf):
 class Stripe:
     def __init__(self, config: StripeConfig):
         try:
+            order = _read_pixel_order(config.order)
+            logger.getChild('stripe').warning(f'order {order}, bpp: {len(order)}')
             self.neopixel = neopixel.NeoPixel(
                 _pin_to_board(config.pin),
                 config.count,
-                # brightness=config.brightness,
-                # auto_write=False,
-                # pixel_order=_read_pixel_order(config.order)
+                bpp=len(order),
+                brightness=config.brightness,
+                auto_write=False,
+                pixel_order=_read_pixel_order(config.order)
             )
         except NameError:
             logger.getChild('stripe').warning(f'unknown board type, running in headless mode channel: {config.channel}')
