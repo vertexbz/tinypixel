@@ -31,6 +31,11 @@ class Controller(BaseController):
     def __init__(self, channels: ControllerConfig):
         stripes = tuple(Stripe(config) if config is not None else None for config in channels)
         self._channel = Channels(stripes)
+        self.off()
+
+        for stripe in self._channel:
+            if stripe is not None:
+                stripe.fill((255, 0, 0, 0))
 
     def handle(self, cmd: AnyCommand):
         if isinstance(cmd, SetLedCommand):
