@@ -3,7 +3,7 @@ import os
 import sys
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(relativepath)s:%(lineno)d)"
 
