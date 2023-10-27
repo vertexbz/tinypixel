@@ -1,5 +1,6 @@
+from __future__ import annotations
 from typing import Optional
-from stripe import Stripe
+from stripe import Base
 
 
 class InvalidChannelError(Exception):
@@ -7,13 +8,13 @@ class InvalidChannelError(Exception):
 
 
 class Channels:
-    def __init__(self, stripes: tuple[Optional[Stripe], Optional[Stripe], Optional[Stripe], Optional[Stripe]]):
+    def __init__(self, stripes: list[Optional[Base]]):
         self._channel = stripes
 
     def __iter__(self):
         return filter(lambda s: s is not None, self._channel)
 
-    def __getitem__(self, item: int) -> Stripe:
+    def __getitem__(self, item: int) -> Base:
         if not isinstance(item, int):
             raise InvalidChannelError('key has to be an integer')
         if 0 > item >= len(self._channel):

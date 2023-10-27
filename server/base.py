@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from abc import abstractmethod
 import grp
 import os
 import socket
@@ -9,6 +9,15 @@ from typing import Optional
 from _thread import *
 
 logger = logger.getChild('server')
+
+
+def get_grp() -> int:
+    try:
+        return grp.getgrnam('gpio').gr_gid
+    except:
+        return os.getgid()
+
+
 
 class Server:
     def __init__(self, socket_file: str, buffer_size: int = 128, encoding: Optional[str] = 'utf-8'):
@@ -25,7 +34,8 @@ class Server:
 
         # Bind the socket to socket_file
         sock.bind(self.socket_file)
-        os.chown(self.socket_file, os.getuid(), grp.getgrnam('gpio').gr_gid)
+        logger.info(f'UID: {os.getuid()} GID: {get_grp()}')
+        os.chown(self.socket_file, os.getuid(), get_grp())
         os.chmod(self.socket_file, 0o770)
 
         # Listen for incoming connections
@@ -75,5 +85,6 @@ class Server:
         finally:
             logger.info(f'Disconnected {client_id}')
 
+    @abstractmethod
     def handle_data(self, connection, data: str, client_id: int) -> bool:
         pass

@@ -6,7 +6,7 @@ Host neopixel control
 ## Install service
 ```shell
 sudo apt update
-sudo apt install -y git python3-dev python3-virtualenv
+sudo apt install -y git python3-dev python3-virtualenv libi2c-dev python3-smbus
 pip install --upgrade pip
 
 cd ~

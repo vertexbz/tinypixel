@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from server import Server
 from logger import logger
 from command import from_line as command_from_line, UnknownCommandError, Controller

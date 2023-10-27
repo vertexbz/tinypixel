@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 import sys
 import argparse
 import configparser
-
 from utils import to_hex_color
 from typing import Optional as Opt
 from logger import logger, stdout_handler, file_handler
@@ -23,13 +21,8 @@ ControllerConfig = tuple[Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig]
 
 class Controller(BaseController):
     def __init__(self, channels: ControllerConfig):
-        stripes = tuple(Stripe(config) if config is not None else None for config in channels)
-        self._channel = Channels(stripes)
+        self._channel = Channels([Stripe(config) if config is not None else None for config in channels])
         self.off()
-
-        for stripe in self._channel:
-            if stripe is not None:
-                stripe.fill((255, 0, 0, 0))
 
     def handle(self, cmd: AnyCommand):
         if isinstance(cmd, SetLedCommand):

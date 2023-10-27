@@ -1,10 +1,11 @@
 from __future__ import annotations
-
 from types import TracebackType
 from logger import logger
 from typing import Optional, Union, Sequence, Type
+from stripe.base import Base
+from stripe.dummy import Dummy
+from stripe.config import StripeConfig
 from type import NeoPin, NeoColor, NeoOrder
-from adafruit_pixelbuf import PixelBuf
 from utils import to_hex_color
 
 try:
@@ -38,32 +39,8 @@ def _read_pixel_order(order: NeoOrder):
 
     raise ValueError('invalid order: ' + order)
 
-class StripeConfig:
-    def __init__(self, channel: int, data):
-        self.channel = channel
-        self.pin = data.getint('pin')
-        self.count = data.getint('count', 1)
-        self.order = data['order']
-        self.brightness = data.getfloat('brightness', 1.0)
 
-
-class Dummy(PixelBuf):
-    def __init__(self, config: StripeConfig):
-        super().__init__(
-            config.count, brightness=config.brightness, byteorder="RGBW", auto_write=False
-        )
-        self.n = config.count
-        self.channel = config.channel
-
-    def deinit(self):
-        pass
-
-    def show(self):
-        logger.getChild('stripe').warning(f'rendering dummy channel {self.channel}')
-        pass
-
-
-class Stripe:
+class Stripe(Base):
     def __init__(self, config: StripeConfig):
         self._logger = logger.getChild('stripe').getChild(f'channel {config.channel}')
 
@@ -86,10 +63,8 @@ class Stripe:
             logger.getChild('stripe').warning(f'unknown board type, running in headless mode channel: {config.channel}')
             self.neopixel = Dummy(config)
 
-
     def deinit(self):
         self.neopixel.deinit()
-        pass
 
     def __enter__(self):
         return self
