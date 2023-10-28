@@ -52,12 +52,12 @@ class Dummy(PixelBuf):
         pass
 
     def show(self):
-        logger.getChild('stripe').warning(f'rendering dummy channel {self.channel}')
+        logger.getChild('stripe').getChild(f'{self.channel}').warning('dummy rendering  channel')
 
 
 class Stripe(Base):
     def __init__(self, config: StripeConfig):
-        self._logger = logger.getChild('stripe').getChild(f'channel {config.channel}')
+        self._logger = logger.getChild('stripe').getChild(f'{config.channel}')
 
         try:
             pin = _pin_to_board(config.pin)
@@ -75,7 +75,7 @@ class Stripe(Base):
                 pixel_order=_read_pixel_order(config.order)
             )
         except NameError:
-            logger.getChild('stripe').warning(f'unknown board type, running in headless mode channel: {config.channel}')
+            self._logger.warning('unknown board type, running in headless mode')
             self.neopixel = Dummy(config)
 
     def deinit(self):

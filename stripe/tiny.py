@@ -1,5 +1,7 @@
 from __future__ import annotations
+from time import sleep
 from enum import Enum
+from functools import reduce
 from logger import logger
 from typing import Optional, Union, Sequence
 from stripe.base import Base
@@ -10,6 +12,7 @@ from utils import to_hex_color
 try:
     import smbus
 except ModuleNotFoundError:
+    # import smbus2 as smbus
     pass
 
 
@@ -110,11 +113,35 @@ class Interface:
         self._bus = Interface._buses[id]
         Interface._buses_refs[id] += 1
 
+    def _checksum(self, cmd: int, data: list[int]):
+        return reduce(lambda a, b: a ^ b, [cmd, *data])
+
+    def _flush(self):
+        for _ in range(6):
+            self._bus.write_byte(0x69, 0xFF)
+            sleep(1 / 1000)
+            if self._bus.read_byte(0x69) == 0x00:
+                sleep(1 / 1000)
+                return
+            else:
+                sleep(1 / 1000)
+
+        self._logger.warning('couldn\'t achieve clean state')
+
     def write(self, command: Command, channel: int, *data: int):
         cmd = (command.value << 4) | channel
-        self._logger.debug(f'writing i2c data: 69 {cmd:02X} ' + ' '.join(f'{b:02X}' for b in data))
+        to_send = [*data, self._checksum(cmd, data or [0xFF])]
+
+        self._logger.debug(f'writing i2c data: 69 {cmd:02X} ' + ' '.join(f'{b:02X}' for b in to_send))
+
         if self._bus is not None:
-            self._bus.write_i2c_block_data(0x69, cmd, data)
+            self._flush()
+            self._bus.write_i2c_block_data(0x69, cmd, to_send)
+
+            sleep(10 / 1000)
+
+            if self._bus.read_byte(0x69) != 0x42:
+                self._logger.error(f'failed transmitting command {cmd:02X}')
 
     def deinit(self):
         Interface._buses_refs[self._id] -= 1
@@ -135,7 +162,7 @@ class Tiny(Base):
         self._brightness = config.brightness
         self._bytes = len(config.order)
 
-        self._logger = logger.getChild('stripe').getChild(f'channel {self._channel}')
+        self._logger = logger.getChild('stripe').getChild(f'{self._channel}')
 
         self._logger.debug(f'bus {config.bus}, count: {config.count}')
         self._logger.debug(f'order {config.order}, bpp: {len(config.order)}')
