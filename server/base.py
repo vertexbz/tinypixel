@@ -25,29 +25,30 @@ class Server:
         self.buffer_size = buffer_size
         self.socket_file = socket_file
         self.encoding = encoding
+        self.sock = None
 
     def start(self):
         # Create a Unix socket
         if os.path.exists(self.socket_file):
             os.unlink(self.socket_file)
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
         # Bind the socket to socket_file
-        sock.bind(self.socket_file)
+        self.sock.bind(self.socket_file)
         logger.info(f'UID: {os.getuid()} GID: {get_grp()}')
         os.chown(self.socket_file, os.getuid(), get_grp())
         os.chmod(self.socket_file, 0o770)
 
         # Listen for incoming connections
-        sock.listen()
+        self.sock.listen()
 
         logger.info(f'Listening at: {self.socket_file}')
 
         while True:
-            if not self.accept_connection(sock):
+            if not self.accept_connection(self.sock):
                 break
 
-        sock.close()
+        self._close()
         logger.info(f'Server shutdown')
 
     def accept_connection(self, sock: socket) -> bool:
@@ -59,6 +60,10 @@ class Server:
         except KeyboardInterrupt:
             print('\r', end='')
             return False
+        except OSError as e:
+            if e.errno == 9:
+                return False
+            raise e
 
         return True
 
@@ -88,3 +93,11 @@ class Server:
     @abstractmethod
     def handle_data(self, connection, data: str, client_id: int) -> bool:
         pass
+
+    def _close(self):
+        if self.sock:
+            self.sock.close()
+        self.sock = None
+
+    def deinit(self):
+        self._close()

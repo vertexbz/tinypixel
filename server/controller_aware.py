@@ -28,3 +28,7 @@ class ControllerAwareServer(Server):
             logger.warning(f'Client {client_id}: invalid command: {data.strip()}')
 
         return True
+
+    def deinit(self):
+        super().deinit()
+        self.controller.deinit()

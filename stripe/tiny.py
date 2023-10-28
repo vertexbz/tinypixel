@@ -99,12 +99,13 @@ class Interface:
         self._logger = logger.getChild('smbus').getChild(f'id {id}')
 
         if id not in Interface._buses:
+            self._logger.debug(f'initializing smbus {id}')
             Interface._buses_refs[id] = 0
             try:
                 Interface._buses[id] = smbus.SMBus(id)
             except:
                 Interface._buses[id] = None
-                logger.getChild('stripe').warning(f'unknown board type, running in headless mode bus: {id}')
+                self._logger.warning(f'unknown board type, running in headless mode bus: {id}')
 
         self._bus = Interface._buses[id]
         Interface._buses_refs[id] += 1
@@ -118,7 +119,9 @@ class Interface:
     def deinit(self):
         Interface._buses_refs[self._id] -= 1
         if Interface._buses_refs[self._id] <= 0:
-            Interface._buses[self._id].close()
+            self._logger.debug(f'closing smbus {self._id}')
+            if Interface._buses[self._id] is not None:
+                Interface._buses[self._id].close()
             del Interface._buses[self._id]
 
 

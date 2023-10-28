@@ -58,11 +58,10 @@ class Controller(BaseController):
 
 
 def main(sock: str, config: ControllerConfig):
-    controller = Controller(config)
-    signal.signal(signal.SIGINT, controller.deinit)
-    signal.signal(signal.SIGTERM, controller.deinit)
-
-    ControllerAwareServer(sock, controller).start()
+    server = ControllerAwareServer(sock, Controller(config))
+    signal.signal(signal.SIGINT, lambda _,__: server.deinit())
+    signal.signal(signal.SIGTERM, lambda _,__: server.deinit())
+    server.start()
 
 
 def load_config_file(path: str) -> ControllerConfig:
