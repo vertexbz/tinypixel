@@ -11,11 +11,6 @@ class Base:
     def __init__(self, config: StripeConfig):
         pass
 
-    @abstractmethod
-    def deinit(self):
-        pass
-
-
     def __enter__(self):
         return self
 
@@ -26,6 +21,10 @@ class Base:
         traceback: Optional[TracebackType],
     ):
         self.deinit()
+
+    @abstractmethod
+    def deinit(self):
+        pass
 
     @abstractmethod
     def fill(self, color: NeoColor, send: bool = True):

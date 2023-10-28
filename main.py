@@ -6,7 +6,7 @@ from utils import to_hex_color
 from typing import Optional as Opt
 from logger import logger, stdout_handler, file_handler
 from server import ControllerAwareServer
-from stripe import Stripe, StripeConfig
+from stripe import stripe_from_config, StripeConfig
 from channels import Channels
 from command import AnyCommand, Controller as BaseController
 from command.set_led import SetLedCommand
@@ -21,7 +21,7 @@ ControllerConfig = tuple[Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig]
 
 class Controller(BaseController):
     def __init__(self, channels: ControllerConfig):
-        self._channel = Channels([Stripe(config) if config is not None else None for config in channels])
+        self._channel = Channels([stripe_from_config(config) for config in channels])
         self.off()
 
     def handle(self, cmd: AnyCommand):

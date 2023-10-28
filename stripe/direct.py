@@ -1,9 +1,9 @@
 from __future__ import annotations
 from types import TracebackType
+from adafruit_pixelbuf import PixelBuf
 from logger import logger
 from typing import Optional, Union, Sequence, Type
 from stripe.base import Base
-from stripe.dummy import Dummy
 from stripe.config import StripeConfig
 from type import NeoPin, NeoColor, NeoOrder
 from utils import to_hex_color
@@ -38,6 +38,21 @@ def _read_pixel_order(order: NeoOrder):
         return neopixel.GRBW
 
     raise ValueError('invalid order: ' + order)
+
+
+class Dummy(PixelBuf):
+    def __init__(self, config: StripeConfig):
+        super().__init__(
+            config.count, brightness=config.brightness, byteorder="RGBW", auto_write=False
+        )
+        self.n = config.count
+        self.channel = config.channel
+
+    def deinit(self):
+        pass
+
+    def show(self):
+        logger.getChild('stripe').warning(f'rendering dummy channel {self.channel}')
 
 
 class Stripe(Base):
@@ -101,6 +116,11 @@ class Stripe(Base):
 
     @brightness.setter
     def brightness(self, value: float):
+        if value > 1:
+            value = 1
+        if value < 0:
+            value = 0
+
         self.neopixel.brightness = value
 
     @property

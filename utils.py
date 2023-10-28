@@ -12,4 +12,4 @@ def to_hex_color(colors: Union[list[int], NeoColor]) -> str:
     if len(colors) == 3:
         colors = [*colors, 0]
 
-    return ''.join('%02x' % color for color in colors)
+    return '#' + ''.join('%02X' % color for color in colors)
