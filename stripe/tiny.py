@@ -92,22 +92,34 @@ class Command(Enum):
 
 class Interface:
     _buses: dict[int, Optional[smbus.SMBus]] = {}
+    _buses_refs: dict[int, int] = {}
 
     def __init__(self, id: int):
+        self._id = id
+        self._logger = logger.getChild('smbus').getChild(f'id {id}')
+
         if id not in Interface._buses:
+            Interface._buses_refs[id] = 0
             try:
                 Interface._buses[id] = smbus.SMBus(id)
             except:
                 Interface._buses[id] = None
+                logger.getChild('stripe').warning(f'unknown board type, running in headless mode bus: {id}')
 
         self._bus = Interface._buses[id]
-        self._logger = logger.getChild('smbus').getChild(f'id {id}')
+        Interface._buses_refs[id] += 1
 
     def write(self, command: Command, channel: int, *data: int):
         cmd = (command.value << 4) | channel
         self._logger.debug(f'writing i2c data: 69 {cmd:02X} ' + ' '.join(f'{b:02X}' for b in data))
         if self._bus is not None:
             self._bus.write_i2c_block_data(0x69, cmd, data)
+
+    def deinit(self):
+        Interface._buses_refs[self._id] -= 1
+        if Interface._buses_refs[self._id] <= 0:
+            Interface._buses[self._id].close()
+            del Interface._buses[self._id]
 
 
 class Tiny(Base):
@@ -118,6 +130,7 @@ class Tiny(Base):
     def __init__(self, config: StripeConfig):
         self._channel = config.channel
         self._brightness = config.brightness
+        self._bytes = len(config.order)
 
         self._logger = logger.getChild('stripe').getChild(f'channel {self._channel}')
 
@@ -133,13 +146,20 @@ class Tiny(Base):
         if isinstance(color, int):
             color = (color, color, color)
 
-        if len(color) == 3 and len(self._buf[0]) == 4:
-            return color[0], color[1], color[2], 255  # todo
+        if len(color) == 3 and self._bytes == 4:
+            return color[0], color[1], color[2], 0
+
+        if len(color) == 4 and self._bytes == 3:
+            return color[0], color[1], color[2]
 
         return color
 
     def _apply_brightness(self, color: NeoColor) -> NeoColor:
-        return color  # todo
+        b = self._brightness
+        if len(color) == 3:
+            return int(color[0] * b), int(color[1] * b), int(color[2] * b)
+
+        return int(color[0] * b), int(color[1] * b), int(color[2] * b), int(color[3] * b)
 
     def fill(self, color: NeoColor, send: bool = True):
         self._logger.debug(f'filling with {to_hex_color(color)}')
@@ -183,4 +203,4 @@ class Tiny(Base):
         return len(self._buf)
 
     def deinit(self):
-        pass
+        self._bus.deinit()

@@ -22,6 +22,9 @@ class Controller:
     def handle(self, command: AnyCommand) -> Union[bool, tuple[str, bool], str]:
         pass
 
+    def deinit(self):
+        pass
+
 
 def from_line(line: str) -> AnyCommand:
     line = line.strip()

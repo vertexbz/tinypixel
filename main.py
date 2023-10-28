@@ -1,5 +1,6 @@
 from __future__ import annotations
 import sys
+import signal
 import argparse
 import configparser
 from utils import to_hex_color
@@ -16,7 +17,7 @@ from command.read import ReadCommand
 from command.count import CountCommand
 from command.fill import FillCommand
 
-ControllerConfig = tuple[Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig], Opt[StripeConfig]]
+ControllerConfig = list[Opt[StripeConfig]]
 
 
 class Controller(BaseController):
@@ -52,25 +53,32 @@ class Controller(BaseController):
             if stripe is not None:
                 stripe.fill((0, 0, 0, 0))
 
+    def deinit(self):
+        self._channel.deinit()
+
 
 def main(sock: str, config: ControllerConfig):
-    ControllerAwareServer(sock, Controller(config)).start()
+    controller = Controller(config)
+    signal.signal(signal.SIGINT, controller.deinit)
+    signal.signal(signal.SIGTERM, controller.deinit)
+
+    ControllerAwareServer(sock, controller).start()
 
 
 def load_config_file(path: str) -> ControllerConfig:
     config = configparser.ConfigParser()
     config.read(path)
 
-    channels_config = (None, None, None, None)
-    for section_name in config.sections():
-        if section_name not in [f'channel {c}' for c in range(3)]:
+    channels_config = []
+
+    sections = config.sections()
+    sections.sort()
+    for section_name in sections:
+        if not section_name.startswith('channel '):
             raise ValueError(f'invalid config section: {section_name}')
 
         channel = int(section_name[8:])
-
-        l = list(channels_config)
-        l[channel] = StripeConfig(channel, config[section_name])
-        channels_config = tuple(l)
+        channels_config.insert(channel, StripeConfig(channel, config[section_name]))
 
     return channels_config
 

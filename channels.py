@@ -23,3 +23,7 @@ class Channels:
             raise InvalidChannelError(f'channel {item} is not defined')
 
         return self._channel[item]
+
+    def deinit(self):
+        for channel in self._channel:
+            channel.deinit()
