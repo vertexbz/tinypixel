@@ -2,6 +2,8 @@ name: hostpixel
 author: vertexbz@gmail.com
 license: WTF
 provides:
+  system-packages:
+    apt: [libi2c-dev, python3-smbus]
   pip-app:
     services:
       - hostpixel.service
