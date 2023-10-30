@@ -2,8 +2,8 @@
 _DIR=$(cd "$(dirname "$0")"; pwd)
 PYTHON=`which python3`
 
-if [[ "${_DIR}" == /opt/git-* ]] && [[ -x /var/opt/hostpixel/bin/pyhon ]]; then
-  PYTHON=/var/opt/hostpixel/bin/pyhon
+if [[ "${_DIR}" == /opt/git-* ]] && [[ -x /var/opt/hostpixel/bin/python ]]; then
+  PYTHON=/var/opt/hostpixel/bin/python
 fi
 
 echo Python used: ${PYTHON}
