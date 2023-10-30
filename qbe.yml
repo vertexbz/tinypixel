@@ -1,19 +1,12 @@
-name: hostpixel
+name: tinypixel
 author: vertexbz@gmail.com
 license: WTF
 provides:
   system-packages:
     apt: [libi2c-dev, python3-smbus]
-  pip-app:
-#    services:
-#      - hostpixel.service
-    pip-requirements: ./requirements.txt
-  moonraker-config:
-    blueprint:
-      - hostpixel.conf
   moonraker-extension:
-    - source: extension/hostpixel.py
-      target: hostpixel.py
+    - source: extension/tinypixel
+      target: tinypixel
       only:
         moonraker: true
   klipper-extension:
@@ -21,7 +14,7 @@ provides:
       target: dummypixel.py
       only:
         klipper: dummy
-    - source: extension/hostpixel.py
-      target: hostpixel.py
+    - source: extension/tinypixel
+      target: tinypixel
       only:
         klipper: full

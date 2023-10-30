@@ -1,19 +1,26 @@
 from __future__ import annotations
 from abc import abstractmethod
-from enum import Enum
-
-
-class Command(Enum):
-    INIT = 0xF
-    OFF = 0x0
-    FILL = 0x1
-    SET = 0x2
-    SHOW = 0xE
 
 
 class Interface:
     @abstractmethod
-    def send(self, command: Command, channel: int, *data: int) -> bool:
+    def init(self, channel: int, count: int, typ: str) -> bool:
+        pass
+
+    @abstractmethod
+    def fill(self, channel: int, color: tuple[int, int, int]) -> bool:
+        pass
+
+    @abstractmethod
+    def set(self, channel: int, index: int, color: tuple[int, int, int]) -> bool:
+        pass
+
+    @abstractmethod
+    def show(self, channel: int) -> bool:
+        pass
+
+    @abstractmethod
+    def off(self, channel: int) -> bool:
         pass
 
     @abstractmethod
