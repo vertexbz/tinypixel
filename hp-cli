@@ -1,7 +1,8 @@
 #!/bin/sh
 _DIR=$(cd "$(dirname "$0")"; pwd)
 PYTHON=`which python3`
-if [ "${_DIR}" == "/opt/git-*" ] && [ -x /var/opt/hostpixel/bin/pyhon ]; then
+
+if [ "${_DIR}" == /opt/git-* ] && [[ -d /var/opt/hostpixel/bin/pyhon ]]; then
   PYTHON=/var/opt/hostpixel/bin/pyhon
 fi
 
