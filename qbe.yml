@@ -5,8 +5,8 @@ provides:
   system-packages:
     apt: [libi2c-dev, python3-smbus]
   pip-app:
-    services:
-      - hostpixel.service
+#    services:
+#      - hostpixel.service
     pip-requirements: ./requirements.txt
   moonraker-config:
     blueprint:
