@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 _DIR=$(cd "$(dirname "$0")"; pwd)
 PYTHON=`which python3`
 
