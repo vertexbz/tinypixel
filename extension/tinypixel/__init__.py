@@ -26,6 +26,8 @@ def load_config_prefix(config: ConfigWrapper):
     pled.led_helpers[extension.name] = extension
 
     pconfig: PrinterConfig = printer.load_object(config, 'configfile')
-    pconfig.set(neo_key, 'chain_count', extension.get_led_count())
+    pconfig.status_settings[neo_key] = {
+        'chain_count': extension.get_led_count()
+    }
 
     return extension
