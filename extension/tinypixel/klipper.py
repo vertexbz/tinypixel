@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class Extension:
     _printer: Printer
+    _bus: int
     _channel: int
     _chain_count: int
     _color_order: str
@@ -28,7 +29,7 @@ class Extension:
 
         # Config
         name = config.get_name().split()[-1]
-        bus = config.getint('bus')
+        self._bus = config.getint('bus')
         self._channel = config.getint('channel')
         self._chain_count = config.getint('chain_count', minval=1)
         # TODO validate color order
@@ -38,17 +39,21 @@ class Extension:
         self.pending_state = {}
         self.current_state = [(0.0, 0.0, 0.0, 0.0)] * self._chain_count
 
-        # Init interface
-        self._interface = I2CInterface(bus)
-
         # Register handlers
         self._printer.register_event_handler("klippy:connect", self._connect)
+        self._printer.register_event_handler("klippy:disconnect", self._disconnect)
         gcode.register_mux_command("SET_LED", "LED", name, self.cmd_SET_LED, desc=self.cmd_SET_LED_help)
         pled.led_helpers[name] = self
 
     def _connect(self, *_):
+        logging.info('tinypixel: init')
+        self._interface = I2CInterface(self._bus)
         self._interface.init(self._channel, self._chain_count, self._color_order)
         self._interface.off(self._channel)
+
+    def _disconnect(self, *_):
+        logging.info('tinypixel: deinit')
+        self._interface.deinit()
 
     def get_led_count(self):
         return self._chain_count
