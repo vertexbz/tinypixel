@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Any
 
 FloatColor = tuple[float, float, float, float]
 IntColor = tuple[int, int, int, int]
@@ -17,13 +17,13 @@ class Color:
     _float: Optional[FloatColor] = None
 
     @classmethod
-    def from_float(cls, r: float, g: float, b: float, w: float) -> Color:
+    def from_float(cls, r: float, g: float, b: float, w: float = 0.) -> Color:
         c = Color()
         c._float = (r, g, b, w)
         return c
 
     @classmethod
-    def from_int(cls, r: int, g: int, b: int, w: int) -> Color:
+    def from_int(cls, r: int, g: int, b: int, w: int = 0) -> Color:
         c = Color()
         c._int = (r, g, b, w)
         return c
@@ -44,9 +44,33 @@ class Color:
     def eq_int(self, other: IntColor) -> bool:
         return self.int() == other
 
+    def eq_color(self, other: Color) -> bool:
+        return self.int() == other.int()
+
+    def __ne__(self, other: Any):
+        return not self == other
+
+    def __eq__(self, other: Any):
+        if isinstance(other, Color):
+            return self.eq_color(other)
+
+        if isinstance(other, tuple) and len(other) == 4:
+            if all(isinstance(o, float) for o in other):
+                return self.eq_float(other)
+
+            if all(isinstance(o, int) for o in other):
+                return self.eq_int(other)
+
+        return False
+
 
 if __name__ == '__main__':
     assert Color.from_float(1, 1, 1, 1).float() == (1.0, 1.0, 1.0, 1.0)
     assert Color.from_int(255, 255, 255, 255).int() == (255, 255, 255, 255)
     assert Color.from_int(255, 255, 255, 255).float() == (1.0, 1.0, 1.0, 1.0)
     assert Color.from_float(1.0, 1.0, 1.0, 1.0).int() == (255, 255, 255, 255)
+
+    assert Color.from_float(1, 1, 1, 1) == (1.0, 1.0, 1.0, 1.0)
+    assert Color.from_int(255, 255, 255, 255) == (255, 255, 255, 255)
+    assert Color.from_int(255, 255, 255, 255) == (1.0, 1.0, 1.0, 1.0)
+    assert Color.from_float(1.0, 1.0, 1.0, 1.0) == (255, 255, 255, 255)
