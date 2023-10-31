@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 class Extension:
     _printer: Printer
+
+    name: str
     _bus: int
     _channel: int
     _chain_count: int
@@ -28,7 +30,7 @@ class Extension:
         pled: PrinterLED = self._printer.load_object(config, "led")
 
         # Config
-        name = config.get_name().split()[-1]
+        self.name = config.get_name().split()[-1]
         self._bus = config.getint('bus')
         self._channel = config.getint('channel')
         self._chain_count = config.getint('chain_count', minval=1)
@@ -42,8 +44,8 @@ class Extension:
         # Register handlers
         self._printer.register_event_handler("klippy:connect", self._connect)
         self._printer.register_event_handler("klippy:disconnect", self._disconnect)
-        gcode.register_mux_command("SET_LED", "LED", name, self.cmd_SET_LED, desc=self.cmd_SET_LED_help)
-        pled.led_helpers[name] = self
+        gcode.register_mux_command("SET_LED", "LED", self.name, self.cmd_SET_LED, desc=self.cmd_SET_LED_help)
+        pled.led_helpers[self.name] = self
 
     def _connect(self, *_):
         logging.info('tinypixel: init')
