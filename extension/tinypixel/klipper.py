@@ -6,7 +6,6 @@ from .types import Color, FloatColor
 
 if TYPE_CHECKING:
     from configfile import ConfigWrapper
-    from extras.led import PrinterLED
     from gcode import GCodeDispatch
     from klippy import Printer
 
@@ -27,7 +26,6 @@ class Extension:
     def __init__(self, config: ConfigWrapper):
         self._printer = config.get_printer()
         gcode: GCodeDispatch = self._printer.lookup_object('gcode')
-        pled: PrinterLED = self._printer.load_object(config, "led")
 
         # Config
         self.name = config.get_name().split()[-1]
@@ -36,6 +34,8 @@ class Extension:
         self._chain_count = config.getint('chain_count', minval=1)
         # TODO validate color order
         self._color_order = config.get('color_order', 'BGR').strip().upper()
+        if len(self._color_order) < 3 or len(self._color_order) > 4:
+            raise config.error(f'"{self._color_order}" is not valid color order')
 
         # Init fields
         self.pending_state = {}
@@ -45,7 +45,6 @@ class Extension:
         self._printer.register_event_handler("klippy:connect", self._connect)
         self._printer.register_event_handler("klippy:disconnect", self._disconnect)
         gcode.register_mux_command("SET_LED", "LED", self.name, self.cmd_SET_LED, desc=self.cmd_SET_LED_help)
-        pled.led_helpers[self.name] = self
 
     def _connect(self, *_):
         logging.info('tinypixel: init')
