@@ -53,6 +53,8 @@ class Native(Bus):
             except OSError as e:
                 if e.errno == 121:
                     self._logger.error(f'failed transmitting command [OSError: 121]: Remote I/O error {cmd:02X}')
+                elif e.errno == 5:
+                    self._logger.error(f'failed transmitting command [OSError: 5]: I/O error {cmd:02X}')
                 else:
                     raise e
 

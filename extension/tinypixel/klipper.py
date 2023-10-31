@@ -54,7 +54,8 @@ class Extension:
 
     def _disconnect(self, *_):
         logging.info('tinypixel: deinit')
-        self._interface.deinit()
+        if hasattr(self, '_interface') and self._interface:
+            self._interface.deinit()
 
     def get_led_count(self):
         return self._chain_count
