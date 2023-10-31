@@ -71,7 +71,8 @@ class Extension:
 
     def _set_color(self, index: int, color: Color):
         if color.eq_float(self.current_state[index]):
-            del self.pending_state[index]
+            if index in self.pending_state:
+                del self.pending_state[index]
         else:
             self.pending_state[index] = color
 
