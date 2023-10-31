@@ -61,7 +61,7 @@ class Extension:
         return self._chain_count
 
     def get_status(self, *_):
-        return { 'color_data': self.current_state}
+        return {'color_data': self.current_state}
 
     def check_transmit(self, *_):
         if len(self.pending_state) == 0:
@@ -89,21 +89,28 @@ class Extension:
             self._set_color(index - 1, color)
 
     def _transmit(self):
-        def inner():
-            if len(self.pending_state) == self._chain_count:
-                values = list(self.pending_state.values())
-                if all(i == values[0] for i in values):
+        sent = False
+        shown = False
+        if len(self.pending_state) == self._chain_count:
+            values = list(self.pending_state.values())
+            if all(i == values[0] for i in values):
+                if sum(values) == 0:
+                    self._interface.off(self._channel)
+                    shown = True
+                else:
                     self._interface.fill(self._channel, values[0].int())
-                    self.current_state = [values[0].float()] * self._chain_count
-                    return
+                self.current_state = [values[0].float()] * self._chain_count
+                sent = True
 
+        if not sent:
             for index, color in self.pending_state.items():
                 self._interface.set(self._channel, index, color.int())
                 self.current_state[index] = color.float()
 
-        inner()
+        if not shown:
+            self._interface.show(self._channel)
+
         self.pending_state = {}
-        self._interface.show(self._channel)
 
     cmd_SET_LED_help = "Set the color of an LED"
 
