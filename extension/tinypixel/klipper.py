@@ -115,6 +115,6 @@ class Extension:
         index = gcmd.get_int('INDEX', None, minval=1, maxval=self._chain_count)
         transmit = gcmd.get_int('TRANSMIT', 1) > 0
 
-        self.set_color(index, Color.from_float(red, green, blue, white))
+        self.set_color(index - 1, Color.from_float(red, green, blue, white))
         if transmit:
             self.check_transmit()
