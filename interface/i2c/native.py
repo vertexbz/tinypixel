@@ -42,13 +42,21 @@ class Native(Bus):
         for _ in range(5):
             self._logger.debug(f'writing i2c data: 69 {cmd:02X} ' + ' '.join(f'{b:02X}' for b in to_send))
 
-            self._bus.write_i2c_block_data(0x69, cmd, to_send)
+            try:
+                self._bus.write_i2c_block_data(0x69, cmd, to_send)
+                sleep(5 / 1000)
+                if self._bus.read_byte(0x69) == 0x42:
+                    self._logger.debug('command transmitted successfully')
+                    return True
+                else:
+                    self._logger.error(f'failed transmitting command {cmd:02X}')
+            except OSError as e:
+                if e.errno == 121:
+                    self._logger.error(f'failed transmitting command [OSError: 121]: Remote I/O error {cmd:02X}')
+                else:
+                    raise e
+
             sleep(5 / 1000)
-            if self._bus.read_byte(0x69) == 0x42:
-                self._logger.debug('command transmitted successfully')
-                return True
-            else:
-                self._logger.error(f'failed transmitting command {cmd:02X}')
 
         return False
 
