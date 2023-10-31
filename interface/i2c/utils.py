@@ -4,6 +4,8 @@ from functools import reduce
 
 
 def order_to_byte(order: str) -> int:
+    order = order.strip().upper()
+
     if order == "RGB":
         return ((0 << 6) | (0 << 4) | (1 << 2) | (2))
     if order == "RBG":
