@@ -1,11 +1,15 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # Moonraker
     from confighelper import ConfigHelper
+    # Klipper
     from configfile import ConfigWrapper, PrinterConfig
     from klippy import Printer
     from extras.led import PrinterLED
+    from configparser import RawConfigParser
 
 
 def load_component(config: ConfigHelper):
@@ -25,9 +29,8 @@ def load_config_prefix(config: ConfigWrapper):
     pled: PrinterLED = printer.load_object(config, 'led')
     pled.led_helpers[extension.name] = extension
 
-    pconfig: PrinterConfig = printer.load_object(config, 'configfile')
-    pconfig.status_settings[neo_key] = {
-        'chain_count': extension.get_led_count()
-    }
+    fc: RawConfigParser = config.fileconfig
+    fc.add_section(neo_key)
+    fc.set(neo_key, 'chain_count', extension.get_led_count())
 
     return extension
