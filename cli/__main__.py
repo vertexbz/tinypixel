@@ -25,6 +25,14 @@ def off(channel: int,):
 
 @cli.command()
 @cli.argument('channel', nargs=1, type=int)
+def show(channel: int,):
+    iface = I2CInterface(1)
+    iface.show(channel)
+    iface.deinit()
+
+
+@cli.command()
+@cli.argument('channel', nargs=1, type=int)
 @cli.argument('color', nargs=1, type=ColorParam())
 def fill(channel: int, color: tuple[int, int, int]):
     iface = I2CInterface(1)
