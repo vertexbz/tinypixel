@@ -10,7 +10,7 @@ provides:
       only:
         moonraker: true
   klipper-extension:
-    - source: extension/klipper/dummypixel.py
+    - source: extension/dummypixel.py
       target: dummypixel.py
       only:
         klipper: dummy
