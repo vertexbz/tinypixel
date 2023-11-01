@@ -5,7 +5,7 @@ __all__ = ['cli']
 
 @click.group()
 def cli():
-    logger.info('Hostpixel')
+    logger.info('tinypixel')
     logger.set_level(logger.DEBUG_LONG)
 
 

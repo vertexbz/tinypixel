@@ -1,4 +1,4 @@
-# hostpixel
+# tinypixel
 
 Host neopixel control
 
@@ -18,10 +18,9 @@ echo i2c-dev | sudo tee -a /etc/modules
 cd ~
 git clone <REPO>
 
-virtualenv -p python3 ~/hostpixel-env
-~/hostpixel-env/bin/pip install -r ~/hostpixel/requirements.txt
-sudo cp hostpixel.service /etc/systemd/system/ 
-cp hostpixel.conf ~/printer_data/config/
+virtualenv -p python3 ~/tinypixel-env
+~/tinypixel-env/bin/pip install -r ~/tinypixel/requirements.txt
+
 
 reboot
 ```
@@ -33,8 +32,8 @@ reboot
 #### Installation
 
 ```
-[hostpixel lights]
-socket: /tmp/hostpixel
+[tinypixel lights]
+socket: /tmp/tinypixel
 channel: 0
 ```
 
@@ -43,7 +42,7 @@ channel: 0
 #### Install klipper dummypixel extension
 ```
 [dummypixel lights]
-socket: /tmp/hostpixel
+socket: /tmp/tinypixel
 channel: 0
 ```
 or
@@ -56,8 +55,8 @@ chain_count: 50
 
 #### Installation
 ```
-[hostpixel lights]
-socket: /tmp/hostpixel
+[tinypixel lights]
+socket: /tmp/tinypixel
 channel: 0
 ```
 
