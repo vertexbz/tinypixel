@@ -102,7 +102,7 @@ class Extension:
         if len(self.pending_state) == self._chain_count:
             values = list(self.pending_state.values())
             if all(i == values[0] for i in values):
-                if sum(values) == 0:
+                if sum(values[0].int()) == 0:
                     if not self._interface.off(self._channel):
                         raise TransmissionError('off')
                     self.pending_state = {}
