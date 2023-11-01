@@ -1,13 +1,23 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 import logging
+from gcode import CommandError
 from .interface import Interface, I2CInterface
-from .types import Color, FloatColor
+from .types import Color, FloatColor, ColorOrder
 
 if TYPE_CHECKING:
     from configfile import ConfigWrapper
-    from gcode import GCodeDispatch
+    from gcode import GCodeDispatch, GCodeCommand
     from klippy import Printer
+
+
+class TransmissionError(CommandError):
+    def __init__(self, *args):
+        msg = 'failed transmitting the command'
+        if len(args) > 0 and isinstance(args[0], str):
+            msg = f'failed transmitting {args[0]} command'
+            args = args[1:]
+        super().__init__(msg, *args)
 
 
 class Extension:
@@ -17,7 +27,7 @@ class Extension:
     _bus: int
     _channel: int
     _chain_count: int
-    _color_order: str
+    _color_order: ColorOrder
     _interface: Interface
 
     current_state: list[FloatColor]
@@ -32,10 +42,10 @@ class Extension:
         self._bus = config.getint('bus')
         self._channel = config.getint('channel')
         self._chain_count = config.getint('chain_count', minval=1)
-        # TODO validate color order
-        self._color_order = config.get('color_order', 'BGR').strip().upper()
-        if len(self._color_order) < 3 or len(self._color_order) > 4:
-            raise config.error(f'"{self._color_order}" is not valid color order')
+        try:
+            self._color_order = ColorOrder(config.get('color_order', 'BGR'))
+        except ValueError as e:
+            raise config.error(str(e))
 
         # Init fields
         self.pending_state = {}
@@ -89,32 +99,36 @@ class Extension:
             self._set_color(index - 1, color)
 
     def _transmit(self):
-        sent = False
-        shown = False
         if len(self.pending_state) == self._chain_count:
             values = list(self.pending_state.values())
             if all(i == values[0] for i in values):
                 if sum(values) == 0:
-                    self._interface.off(self._channel)
-                    shown = True
+                    if not self._interface.off(self._channel):
+                        raise TransmissionError('off')
+                    self.pending_state = {}
                 else:
-                    self._interface.fill(self._channel, values[0].int())
+                    if not self._interface.fill(self._channel, values[0].int()):
+                        raise TransmissionError('fill')
+                    if not self._interface.show(self._channel):
+                        raise TransmissionError('show')
+                    self.pending_state = {}
                 self.current_state = [values[0].float()] * self._chain_count
-                sent = True
+                return
 
-        if not sent:
-            for index, color in self.pending_state.items():
-                self._interface.set(self._channel, index, color.int())
-                self.current_state[index] = color.float()
+        for index, color in self.pending_state.items():
+            if color.eq_float(self.current_state[index]):
+                continue
+            if not self._interface.set(self._channel, index, color.int()):
+                raise TransmissionError('set')
+            self.current_state[index] = color.float()
 
-        if not shown:
-            self._interface.show(self._channel)
-
+        if not self._interface.show(self._channel):
+            raise TransmissionError('show')
         self.pending_state = {}
 
     cmd_SET_LED_help = "Set the color of an LED"
 
-    def cmd_SET_LED(self, gcmd):
+    def cmd_SET_LED(self, gcmd: GCodeCommand):
         red = gcmd.get_float('RED', 0., minval=0., maxval=1.)
         green = gcmd.get_float('GREEN', 0., minval=0., maxval=1.)
         blue = gcmd.get_float('BLUE', 0., minval=0., maxval=1.)

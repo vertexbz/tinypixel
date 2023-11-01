@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Any
+from typing import Optional, Any, Type
 
 FloatColor = tuple[float, float, float, float]
 IntColor = tuple[int, int, int, int]
@@ -8,8 +8,18 @@ IntColor = tuple[int, int, int, int]
 def _to_int(c: float):
     return int(c * 255. + .5)
 
+
 def _to_float(c: int):
     return c / 255.
+
+
+class ColorOrder(str):
+    def __new__(cls, order: str):
+        order = order.strip().upper()
+        s = set(order)
+        if 'R' in s and 'G' in s and 'B' in s and (len(s) == 3 or (len(s) == 4 and 'W' in s)):
+            return super().__new__(cls, order)
+        raise ValueError(f'"{order}" is not valid color order')
 
 
 class Color:

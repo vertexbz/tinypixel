@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from configfile import ConfigWrapper
     from klippy import Printer
     from extras.led import PrinterLED
-    from configparser import RawConfigParser
 
 
 def load_component(config: ConfigHelper):
