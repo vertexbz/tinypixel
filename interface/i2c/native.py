@@ -45,16 +45,17 @@ class Native(Bus):
             try:
                 self._bus.write_i2c_block_data(0x69, cmd, to_send)
                 sleep(5 / 1000)
-                if self._bus.read_byte(0x69) == 0x42:
+                result = self._bus.read_byte(0x69)
+                if result == 0x42:
                     self._logger.debug('command transmitted successfully')
                     return True
                 else:
-                    self._logger.error(f'failed transmitting command {cmd:02X}')
+                    self._logger.error(f'failed transmitting command, result {result:02X}')
             except OSError as e:
                 if e.errno == 121:
-                    self._logger.error(f'failed transmitting command [OSError: 121]: Remote I/O error {cmd:02X}')
+                    self._logger.error('failed transmitting command [OSError: 121]: Remote I/O error')
                 elif e.errno == 5:
-                    self._logger.error(f'failed transmitting command [OSError: 5]: I/O error {cmd:02X}')
+                    self._logger.error('failed transmitting command [OSError: 5]: I/O error')
                 else:
                     raise e
 
