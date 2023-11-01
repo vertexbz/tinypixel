@@ -17,27 +17,33 @@ def init(channel: int, count: int, mode: str):
 
 @cli.command()
 @cli.argument('channel', nargs=1, type=int)
-def off(channel: int,):
+@cli.option('--count', default=1, help='how many times execute the command')
+def off(channel: int, count: int):
     iface = I2CInterface(1)
-    iface.off(channel)
+    for _ in range(count):
+        iface.off(channel)
     iface.deinit()
 
 
 @cli.command()
 @cli.argument('channel', nargs=1, type=int)
-def show(channel: int,):
+@cli.option('--count', default=1, help='how many times execute the command')
+def show(channel: int, count: int):
     iface = I2CInterface(1)
-    iface.show(channel)
+    for _ in range(count):
+        iface.show(channel)
     iface.deinit()
 
 
 @cli.command()
 @cli.argument('channel', nargs=1, type=int)
 @cli.argument('color', nargs=1, type=ColorParam())
-def fill(channel: int, color: tuple[int, int, int]):
+@cli.option('--count', default=1, help='how many times execute the command')
+def fill(channel: int, color: tuple[int, int, int], count: int):
     iface = I2CInterface(1)
-    iface.fill(channel, color)
-    iface.show(channel)
+    for _ in range(count):
+        iface.fill(channel, color)
+        iface.show(channel)
     iface.deinit()
 
 
@@ -45,10 +51,12 @@ def fill(channel: int, color: tuple[int, int, int]):
 @cli.argument('channel', nargs=1, type=int)
 @cli.argument('index', nargs=1, type=int)
 @cli.argument('color', nargs=1, type=ColorParam())
-def set(channel: int, index: int, color: tuple[int, int, int]):
+@cli.option('--count', default=1, help='how many times execute the command')
+def set(channel: int, index: int, color: tuple[int, int, int], count: int):
     iface = I2CInterface(1)
-    iface.set(channel, index, color)
-    iface.show(channel)
+    for _ in range(count):
+        iface.set(channel, index, color)
+        iface.show(channel)
     iface.deinit()
 
 
