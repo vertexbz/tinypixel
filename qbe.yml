@@ -7,14 +7,9 @@ provides:
   moonraker-extension:
     - source: extension/tinypixel
       target: tinypixel
-      only:
-        moonraker: true
   klipper-extension:
     - source: extension/dummypixel.py
       target: dummypixel.py
-      only:
-        klipper: dummy
     - source: extension/tinypixel
       target: tinypixel
-      only:
-        klipper: full
+# TODO pip install smbus2 in both
