@@ -1,12 +1,11 @@
 from __future__ import annotations
 from typing import Dict, Any, Optional
 import logging
-
 from common import WebRequest
 from confighelper import ConfigError, ConfigHelper
 from server import Server, ServerError
 from .instance import Instance
-
+from ..types import Color
 
 def booleanize(s: Any) -> Optional[bool]:
     if isinstance(s, bool):
@@ -69,16 +68,13 @@ class Extension:
         except Exception as e:
             logging.exception(e)
 
-    async def set_tinypixel_state(self, name: str, s: Optional[str], preset: Optional[int] = -1) -> None:
+    async def set_tinypixel_state(self, name: str, s: Optional[str]) -> None:
         if name not in self._instances:
             raise ServerError(f'Unknown instance \'{name}\'')
 
         state = booleanize(s)
 
-        if preset is not None and preset <= 0:
-            preset = None
-
-        await self._set_tinypixel_state(self._instances[name], state, preset)
+        await self._set_tinypixel_state(self._instances[name], state)
 
     async def set_tinypixel(self, name: str, red: float = 0., green: float = 0., blue: float = 0., white: float = 0., index: Optional[int] = None, t: int = 1) -> None:
         if name not in self._instances:
@@ -113,17 +109,13 @@ class Extension:
         if name not in self._instances:
             raise ServerError(f'Unknown instance \'{name}\'')
 
-        preset: Optional[int] = web_request.get_int('preset', None)
-        if preset is not None and preset <= 0:
-            preset = None
-
         action = 'status'
         if web_request.get_action() == "POST":
             action = web_request.get_str('action').lower()
             if action not in ["on", "off", "toggle", "status"]:
                 raise ServerError(f"Invalid requested action '{action}'")
 
-        return await self._process_request(self._instances[name], action, preset)
+        return await self._process_request(self._instances[name], action)
 
     async def _handle_batch_tinypixel_request(self, web_request: WebRequest) -> Dict[str, Any]:
         args = web_request.get_args()
@@ -135,7 +127,7 @@ class Extension:
         command = ep.split("/")[-1]
         for name in args:
             if name in self._instances:
-                result[name] = await self._process_request(self._instances[name], command, -1)
+                result[name] = await self._process_request(self._instances[name], command)
             else:
                 result[name] = {"error": "instance_not_found"}
         return result
@@ -152,32 +144,27 @@ class Extension:
             }
         }
 
-    async def _process_request(self, instance: Instance, command: str, preset: int) -> Dict[str, Any]:
+    async def _process_request(self, instance: Instance, command: str) -> Dict[str, Any]:
         if command == "status":
             return instance.info()
         if command == "toggle":
-            command = "off" if instance.is_on() else "on"
+            command = "on" if instance.is_off() else "off"
         if command in ["on", "off"]:
-            await self._set_tinypixel_state(instance, command == "on", preset)
+            await self._set_tinypixel_state(instance, command == "on")
             return instance.info()
 
         raise ServerError(f"Unsupported tinypixel request: {command}")
 
-    async def _set_tinypixel_state(self, instance: Instance, state: Optional[bool], preset: Optional[int] = None) -> None:
+    async def _set_tinypixel_state(self, instance: Instance, state: Optional[bool]) -> None:
         if state is True:
-            if preset is not None:
-                instance.preset(preset)
-            else:
-                instance.on()
+            instance.on()
         elif state is False:
             instance.off()
-        elif preset is not None:
-            instance.preset(preset)
 
     async def _set_tinypixel(self, instance: Instance, red: float = 0., green: float = 0., blue: float = 0., white: float = 0., index: Optional[int] = None, transmit: bool = False) -> None:
         if index is None:
-            instance.fill((red, green, blue, white))
+            instance.fill(Color.from_float(red, green, blue, white))
         else:
-            instance.set(index, (red, green, blue, white))
+            instance.set(index, Color.from_float(red, green, blue, white))
         if transmit:
             instance.show()
