@@ -7,7 +7,7 @@ from interface import I2CInterface
 @cli.command()
 @cli.argument('channel', nargs=1, type=int)
 @cli.option('--count', default=20, help='Number of LEDs.')
-@cli.option('--mode', default='BGR', help='LEDs mode.')
+@cli.option('--mode', default='GRB', help='LEDs mode.')
 def init(channel: int, count: int, mode: str):
     iface = I2CInterface(1)
     iface.init(channel, count, mode)

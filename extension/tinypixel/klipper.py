@@ -24,7 +24,7 @@ class Extension:
         self.name = config.get_name().split()[-1]
         try:
             self._stripe = Stripe(
-                I2CInterface(config.getint('bus')),
+                I2CInterface(config.getint('bus'), config.getint('retries', 5, minval=1)),
                 config.getint('channel'),
                 config.getint('chain_count', minval=1),
                 ColorOrder(config.get('color_order', 'BGR'))

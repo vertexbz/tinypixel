@@ -17,8 +17,9 @@ class Native(Bus):
     _buses: dict[int, Optional[smbus.SMBus]] = {}
     _buses_refs: dict[int, int] = {}
 
-    def __init__(self, id: int):
+    def __init__(self, id: int, retries: int = 5):
         self._id = id
+        self._retries = retries
         self._logger = logger.getChild(str(id))
 
         if id not in Native._buses:
@@ -39,7 +40,7 @@ class Native(Bus):
         cmd = (command.value << 4) | channel
         to_send = [*data, checksum(cmd, data or [0xFF])]
 
-        for _ in range(5):
+        for _ in range(self._retries):
             self._logger.debug(f'writing i2c data: 69 {cmd:02X} ' + ' '.join(f'{b:02X}' for b in to_send))
 
             try:

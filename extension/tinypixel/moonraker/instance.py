@@ -22,7 +22,7 @@ class Instance:
 
         try:
             self._stripe = Stripe(
-                I2CInterface(cfg.getint('bus')),
+                I2CInterface(cfg.getint('bus'), cfg.getint('retries', 5, minval=1)),
                 cfg.getint('channel'),
                 cfg.getint('chain_count', minval=1),
                 ColorOrder(cfg.get('color_order', 'BGR'))
