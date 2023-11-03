@@ -1,0 +1,13 @@
+#!/bin/bash
+_DIR=$(cd "$(dirname "$0")"; pwd)
+PYTHON=`which python3`
+
+if [[ -x "${_DIR}/python" ]] && [[ -x /var/opt/tinypixel/bin/python ]]; then
+  PYTHON="${_DIR}/python"
+elif [[ "${_DIR}" == /opt/git-* ]] && [[ -x /var/opt/tinypixel/bin/python ]]; then
+  PYTHON=/var/opt/tinypixel/bin/python
+fi
+
+echo Python used: ${PYTHON}
+cd "${_DIR}"
+exec "${PYTHON}" -m cli $@
