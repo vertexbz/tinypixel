@@ -25,19 +25,19 @@ cd <moonraker-env>
 ./bin/pip install smbus2
 
 cd ~
-git clone <this repo>
+git clone https://github.com/vertexbz/tinypixel.git
 
 # Klipper
-cd ~/<this repo>
+cd ~/tinypixel
 ln -s ./extension/tinypixel <klipper repo>/klippy/extras/
 ln -s ./extension/dummypixel.py <klipper repo>/klippy/extras/
 
 # Klipper
-cd ~/<this repo>
+cd ~/tinypixel
 ln -s ./extension/tinypixel <moonraker repo>/moonraker/components/
 
 # CLI
-cd ~/<this repo>
+cd ~/tinypixel
 virtualenv -p python3 ~/tinypixel-env
 ~/tinypixel-env/bin/pip install -r ./requirements.txt
 cp ./tp-cli ~/tinypixel-env/bin/
